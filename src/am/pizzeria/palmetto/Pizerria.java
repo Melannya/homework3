@@ -36,10 +36,10 @@ public class Pizerria {
                     Integer.parseInt(reader.readLine());
 
             if (pizzaCount > 10) {
-                pizzaCount = 10;
                 System.out.println(
-                        "Maximum is 10 pizzas."
+                        "Maximum number of pizzas is 10."
                 );
+                pizzaCount = 10;
             }
 
             for (int i = 0; i < pizzaCount; i++) {
@@ -61,25 +61,19 @@ public class Pizerria {
                         reader.readLine();
 
                 System.out.print("Quantity: ");
-
                 int quantity =
                         Integer.parseInt(
                                 reader.readLine()
                         );
 
                 order.addPizza(
-                        pizzaType,
                         pizzaName,
+                        pizzaType,
                         quantity
                 );
 
                 System.out.println(
-                        "Available ingredients:"
-                );
-
-                System.out.println(
-                        "Tomato paste, Cheese, Salami, Bacon, " +
-                                "Garlic, Corn, Pepperoni, Pepper, Olives"
+                        "Enter ingredients one by one."
                 );
 
                 System.out.println(
@@ -88,16 +82,12 @@ public class Pizerria {
 
                 while (true) {
 
-                    System.out.print(
-                            "Ingredient: "
-                    );
+                    System.out.print("Ingredient: ");
 
                     String ingredient =
                             reader.readLine();
 
-                    if (ingredient == null ||
-                            ingredient.equalsIgnoreCase("done")) {
-
+                    if (ingredient.equalsIgnoreCase("done")) {
                         break;
                     }
 
@@ -115,7 +105,6 @@ public class Pizerria {
                     order.getOrderDescription()
             );
 
-            System.out.println();
             System.out.println("===== CHECK =====");
 
             order.printCheck();
@@ -124,9 +113,14 @@ public class Pizerria {
                     "receipt.txt"
             );
 
-            System.out.println();
             System.out.println(
                     "Receipt saved to receipt.txt"
+            );
+
+        } catch (IOException e) {
+
+            System.out.println(
+                    "Input/output error."
             );
 
         } catch (NumberFormatException e) {
@@ -134,15 +128,9 @@ public class Pizerria {
             System.out.println(
                     "Please enter a valid number."
             );
-
-        } catch (IOException e) {
-
-            System.out.println(
-                    "Input/output error: " +
-                            e.getMessage()
-            );
         }
     }
 }
+
 
 

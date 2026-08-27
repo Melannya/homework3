@@ -7,67 +7,55 @@ import java.time.LocalTime;
 
 public class Order {
 
-    private static final int MAXIMUM_NUMBER_OF_PIZZAS = 10;
+    private static int orderCounter = 10000;
 
-    private static int orderCounter = 10001;
-
-    private final int orderNumber;
-    private final int customerNumber;
-    private final DynamicArray pizzas;
-    private final LocalTime orderTime;
+    private int orderNumber;
+    private int customerNumber;
+    private Pizza[] pizzas;
+    private int pizzaCount;
+    private LocalTime orderTime;
 
     public Order(Customer customer) {
 
-        this.orderNumber = orderCounter++;
-        this.customerNumber = customer.getCustomerNumber();
-        this.pizzas = new DynamicArray();
-        this.orderTime = LocalTime.now();
+        orderNumber = ++orderCounter;
+        customerNumber = customer.getCustomerNumber();
+
+        pizzas = new Pizza[10];
+        pizzaCount = 0;
+
+        orderTime = LocalTime.now();
     }
 
-    public void addPizza(String type, String name, int quantity) {
+    public void addPizza(String name, String type, int quantity) {
 
-        if (pizzas.size() >= MAXIMUM_NUMBER_OF_PIZZAS) {
+        if (pizzaCount == 10) {
             System.out.println("You cannot order more than 10 pizzas.");
             return;
         }
-
-        if (quantity <= 0) {
-            System.out.println("Quantity must be greater than 0.");
-            return;
-        }
-
-        String validName = validatePizzaName(name);
-
-        String validType;
-
-        if (type != null &&
-                type.equalsIgnoreCase("CALZONE")) {
-
-            validType = PizzaType.CALZONE.name();
-
-        } else {
-
-            validType = PizzaType.REGULAR.name();
-        }
-
-        Pizza pizza = new Pizza(validName, validType);
-
-        pizzas.add(new PizzaItem(pizza, quantity));
-    }
-
-    private String validatePizzaName(String name) {
 
         if (name == null ||
                 name.length() < 4 ||
                 name.length() > 20 ||
                 !isAllLatin(name)) {
 
-            int index = pizzas.size() + 1;
-
-            return "customer_name_" + index;
+            name = "customer_name_" + (pizzaCount + 1);
         }
 
-        return name;
+        Pizza pizza =
+                new Pizza(name, type, quantity);
+
+        pizzas[pizzaCount] = pizza;
+        pizzaCount++;
+    }
+
+    public void addIngredient(int pizzaIndex, String ingredient) {
+
+        if (pizzaIndex < 0 || pizzaIndex >= pizzaCount) {
+            System.out.println("Wrong pizza number.");
+            return;
+        }
+
+        pizzas[pizzaIndex].addIngredient(ingredient);
     }
 
     private boolean isAllLatin(String name) {
@@ -84,100 +72,6 @@ public class Order {
         }
 
         return true;
-    }
-
-    public void addIngredient(String ingredient) {
-
-        if (pizzas.isEmpty()) {
-            System.out.println("There are no pizzas in the order.");
-            return;
-        }
-
-        addIngredient(
-                pizzas.size() - 1,
-                ingredient
-        );
-    }
-
-    public void addIngredient(int pizzaIndex, String ingredient) {
-
-        if (pizzaIndex < 0 ||
-                pizzaIndex >= pizzas.size()) {
-
-            System.out.println("Invalid pizza index.");
-            return;
-        }
-
-        PizzaItem item =
-                (PizzaItem) pizzas.get(pizzaIndex);
-
-        item.getPizza().addIngredient(ingredient);
-    }
-
-    public String getOrderDescription() {
-
-        StringBuilder result =
-                new StringBuilder();
-
-        for (int i = 0; i < pizzas.size(); i++) {
-
-            PizzaItem item =
-                    (PizzaItem) pizzas.get(i);
-
-            result.append("[")
-                    .append(orderNumber)
-                    .append(" : ")
-                    .append(customerNumber)
-                    .append(": ")
-                    .append(item.getPizza().getName())
-                    .append(": ")
-                    .append(item.getQuantity())
-                    .append("]");
-
-            if (i < pizzas.size() - 1) {
-                result.append(System.lineSeparator());
-            }
-        }
-
-        return result.toString();
-    }
-
-    public double calculatePizzaPrice(Pizza pizza) {
-
-        double price;
-
-        if (pizza.getType().equalsIgnoreCase("CALZONE")) {
-            price = PizzaType.CALZONE.getPrice();
-        } else {
-            price = PizzaType.REGULAR.getPrice();
-        }
-
-        for (String ingredient : pizza.getIngredients()) {
-
-            if (ingredient != null) {
-                price += getIngredientPrice(ingredient);
-            }
-        }
-
-        return price;
-    }
-
-    public double calculateTotal() {
-
-        double total = 0;
-
-        for (int i = 0; i < pizzas.size(); i++) {
-
-            PizzaItem item =
-                    (PizzaItem) pizzas.get(i);
-
-            double pizzaPrice =
-                    calculatePizzaPrice(item.getPizza());
-
-            total += pizzaPrice * item.getQuantity();
-        }
-
-        return total;
     }
 
     private double getIngredientPrice(String ingredient) {
@@ -216,6 +110,64 @@ public class Order {
         }
     }
 
+    private double getPizzaPrice(Pizza pizza) {
+
+        double price;
+
+        if (pizza.getType().equalsIgnoreCase("CALZONE")) {
+            price = 1.50;
+        } else {
+            price = 1.00;
+        }
+
+        for (String ingredient : pizza.getIngredients()) {
+
+            if (ingredient != null) {
+                price += getIngredientPrice(ingredient);
+            }
+        }
+
+        return price;
+    }
+
+    public double getTotalAmount() {
+
+        double total = 0;
+
+        for (int i = 0; i < pizzaCount; i++) {
+
+            total += getPizzaPrice(pizzas[i])
+                    * pizzas[i].getQuantity();
+        }
+
+        return total;
+    }
+
+    public String getOrderDescription() {
+
+        StringBuilder result =
+                new StringBuilder();
+
+        for (int i = 0; i < pizzaCount; i++) {
+
+            Pizza pizza = pizzas[i];
+
+            result.append("[")
+                    .append(orderNumber)
+                    .append(" : ")
+                    .append(customerNumber)
+                    .append(" : ")
+                    .append(pizza.getName())
+                    .append(" : ")
+                    .append(pizza.getQuantity())
+                    .append("]");
+
+            result.append(System.lineSeparator());
+        }
+
+        return result.toString();
+    }
+
     public void printCheck() {
 
         System.out.println("********************************");
@@ -223,20 +175,17 @@ public class Order {
         System.out.println("Client: " + customerNumber);
         System.out.println("Order time: " + orderTime);
 
-        for (int i = 0; i < pizzas.size(); i++) {
+        for (int i = 0; i < pizzaCount; i++) {
 
-            PizzaItem item =
-                    (PizzaItem) pizzas.get(i);
-
-            Pizza pizza = item.getPizza();
+            Pizza pizza = pizzas[i];
 
             System.out.println("Name: " + pizza.getName());
             System.out.println("--------------------------------");
 
             double basePrice =
                     pizza.getType().equalsIgnoreCase("CALZONE")
-                            ? PizzaType.CALZONE.getPrice()
-                            : PizzaType.REGULAR.getPrice();
+                            ? 1.50
+                            : 1.00;
 
             System.out.printf(
                     "Pizza Base (%s) %.2f €%n",
@@ -258,16 +207,13 @@ public class Order {
 
             System.out.println("--------------------------------");
 
-            double pizzaPrice =
-                    calculatePizzaPrice(pizza);
-
             System.out.printf(
                     "Amount: %.2f €%n",
-                    pizzaPrice
+                    getPizzaPrice(pizza)
             );
 
             System.out.println(
-                    "Quantity: " + item.getQuantity()
+                    "Quantity: " + pizza.getQuantity()
             );
 
             System.out.println("--------------------------------");
@@ -275,7 +221,7 @@ public class Order {
 
         System.out.printf(
                 "Total amount: %.2f €%n",
-                calculateTotal()
+                getTotalAmount()
         );
 
         System.out.println("********************************");
@@ -292,20 +238,17 @@ public class Order {
             writer.println("Client: " + customerNumber);
             writer.println("Order time: " + orderTime);
 
-            for (int i = 0; i < pizzas.size(); i++) {
+            for (int i = 0; i < pizzaCount; i++) {
 
-                PizzaItem item =
-                        (PizzaItem) pizzas.get(i);
-
-                Pizza pizza = item.getPizza();
+                Pizza pizza = pizzas[i];
 
                 writer.println("Name: " + pizza.getName());
                 writer.println("--------------------------------");
 
                 double basePrice =
                         pizza.getType().equalsIgnoreCase("CALZONE")
-                                ? PizzaType.CALZONE.getPrice()
-                                : PizzaType.REGULAR.getPrice();
+                                ? 1.50
+                                : 1.00;
 
                 writer.printf(
                         "Pizza Base (%s) %.2f €%n",
@@ -329,11 +272,11 @@ public class Order {
 
                 writer.printf(
                         "Amount: %.2f €%n",
-                        calculatePizzaPrice(pizza)
+                        getPizzaPrice(pizza)
                 );
 
                 writer.println(
-                        "Quantity: " + item.getQuantity()
+                        "Quantity: " + pizza.getQuantity()
                 );
 
                 writer.println("--------------------------------");
@@ -341,7 +284,7 @@ public class Order {
 
             writer.printf(
                     "Total amount: %.2f €%n",
-                    calculateTotal()
+                    getTotalAmount()
             );
 
             writer.println("********************************");
@@ -349,44 +292,9 @@ public class Order {
         } catch (IOException e) {
 
             System.out.println(
-                    "Error while writing receipt: " +
-                            e.getMessage()
+                    "Error while writing receipt."
             );
         }
     }
-
-    public int getOrderNumber() {
-        return orderNumber;
-    }
-
-    public int getCustomerNumber() {
-        return customerNumber;
-    }
-
-    public LocalTime getOrderTime() {
-        return orderTime;
-    }
-
-    public DynamicArray getPizzas() {
-        return pizzas;
-    }
-
-    private static class PizzaItem {
-
-        private final Pizza pizza;
-        private final int quantity;
-
-        public PizzaItem(Pizza pizza, int quantity) {
-            this.pizza = pizza;
-            this.quantity = quantity;
-        }
-
-        public Pizza getPizza() {
-            return pizza;
-        }
-
-        public int getQuantity() {
-            return quantity;
-        }
-    }
 }
+

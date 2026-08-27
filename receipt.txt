@@ -1,0 +1,28 @@
+********************************
+Order: 10001
+Client: 7717
+Order time: 02:50:21.941039800
+Name: Margarita
+--------------------------------
+Pizza Base (CALZONE) 1.50 €
+Tomato paste 1.00 €
+Pepper 0.60 €
+Garlic 0.30 €
+Bacon 1.20 €
+--------------------------------
+Amount: 4.60 €
+Quantity: 2
+--------------------------------
+Name: PepperoniOro
+--------------------------------
+Pizza Base (REGULAR) 1.00 €
+Tomato paste 1.00 €
+Cheese 1.00 €
+Pepperoni 0.60 €
+Olives 0.50 €
+--------------------------------
+Amount: 4.10 €
+Quantity: 3
+--------------------------------
+Total amount: 21.50 €
+********************************
