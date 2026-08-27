@@ -11,10 +11,12 @@ public class Customer {
     }
 
     public int getCustomerNumber() {
+
         return customerNumber;
     }
 
     public String getName() {
+
         return name;
     }
 }
